@@ -304,12 +304,12 @@ Several example images are given below demonstrate the augmentations.
 
 These augmentations drastically decreased the loss from the reference, but ultimately the loss was still too high to have the necessary performance.
 
-![png](images/training/augmentations_only.png)
+![png](images/training_experiments/augmentations_only.png)
 
 ##### Playing with Optimizer
 Different settings were then used on the optimizer. All of them drastically decreased the learning rate, and both the momentum optimizer and ADAM optimizer were experimented with. Ultimately, the best results came from a momentum optimizer with a cosine learning rate decay.
 
-![png](images/training/augs_optimizer_losses.png)
+![png](images/training_experiments/augs_optimizer_losses.png)
 
 ##### Playing with Architecture
 
