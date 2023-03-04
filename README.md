@@ -210,7 +210,7 @@ In the workspace, the data was already split into a train/val/test split. If I h
 ### Training
 #### Reference experiment
 
-As seen in the large losses below, the reference experiment had massive losses in the high 100s, and the recall and precision were near zero.
+As seen in the image below, the reference experiment had massive losses in the high 100s, and the recall and precision were near zero.
 
 ![png](images/training/reference_loss.png)
 ![png](images/training/reference_recall_precision.png)
@@ -224,21 +224,21 @@ Attempts were made to improve the model using augmentations, playing with optimi
 
 The following augmentations were applied:
 
-This augmentation randomly flips the image horizontally, which can help the model learn to recognize objects from different viewpoints. 
+This augmentation randomly flips the image horizontally, which can help the model learn to recognize objects from different viewpoints. The model must be viewpoint agnostic in this application.
 
   data_augmentation_options {
     random_horizontal_flip {
     }
   }
   
-This augmentation randomly adjusts the hue of the image, which changes the colors of the pixels.
+This augmentation randomly adjusts the hue of the image, which changes the colors of the pixels. It is advantageous to have the model learn many different combinations of colors.
   data_augmentation_options {
     random_adjust_hue {
     }  
 
   }
   
-This augmentation randomly adjusts the brightness of the image, which can help the model learn to recognize objects under different lighting conditions.
+This augmentation randomly adjusts the brightness of the image, which can help the model learn to recognize objects under different lighting conditions, important for a self driving car in a moderate ODD.
 
   data_augmentation_options {
     random_adjust_brightness {
@@ -246,27 +246,29 @@ This augmentation randomly adjusts the brightness of the image, which can help t
     }
   }
   
-This augmentation randomly adjusts the contrast of the image, which can help the model learn to recognize objects with different levels of detail. 
+This augmentation randomly adjusts the contrast of the image, which can help the model learn to recognize objects with different levels of detail.
  
   data_augmentation_options {
     random_adjust_contrast {
     }
   }
   
-This augmentation randomly adjusts the saturation of the image, which can help the model learn to recognize objects under different lighting conditions.
+This augmentation randomly adjusts the saturation of the image, which can help the model generalize under different lighting conditions.
 
   data_augmentation_options {
     random_adjust_saturation {
     }
   }
 
-This augmentation randomly converts the image from RGB to grayscale, which can help the model learn to recognize objects with less color information. 
+This augmentation randomly converts the image from RGB to grayscale, which can help reduce the model's dependence on color. 
 
   data_augmentation_options {
     random_rgb_to_gray {
     probability: 0.1
     }
   }
+
+This augmentation applies a random order of color distortions to the image, such as adjusting the brightness, contrast, saturation, and hue. These distortions can produce more varied and potentially effective color distortions.
 
   data_augmentation_options {
     random_distort_color {
@@ -300,10 +302,13 @@ Several example images are given below demonstrate the augmentations.
 
 ![png](images/output_7_9.png)
 
+These augmentations drastically decreased the loss from the reference, but ultimately the loss was still too high to have the necessary performance.
 
 ![png](images/training/augmentations_only.png)
 
 ##### Playing with Optimizer
+Different settings were then used on the optimizer. All of them drastically decreased the learning rate, and both the momentum optimizer and ADAM optimizer were experimented with. Ultimately, the best results came from a momentum optimizer with a cosine learning rate decay.
+
 ![png](images/training/augs_optimizer_losses.png)
 
 ##### Playing with Architecture
@@ -312,10 +317,20 @@ New pretrained architectures were used to try and improve performance.
 
 Faster R-CNN ResNet101 V1 640x640 was used, and total loss brought down considerably. However, ultimately due to RPN (Region Proposal Network) losses the precision and recall were still poor.
 
-![png](images/training/faster_res_loss.png)
-![png](images/training/faster_res_precision.png)
-![png](images/training/faster_res_recall.png)
+![png](images/training_experiments/faster_res_loss.png)
+![png](images/training_experiments/faster_res_precision.png)
+![png](images/training_experiments/faster_res_recall.png)
 
-SSD ResNet152 V1 FPN 640x640 (RetinaNet152) was finally used as a last resort, but ultimately classification and localization loss was still too high. As can be seen in the animation, a number of false detections focused on dark areas were occurring. No matter how the augmentations were changed, these could not be eliminated.
+SSD ResNet152 V1 FPN 640x640 (RetinaNet152) was finally used as a last resort, but ultimately classification and localization loss was still too high. As can be seen in the animation, a number of false detections focused on dark areas were occurring.
 
-![png](images/training/experiment5loss.png)
+![png](images/training_experiments/experiment5loss.png)
+
+The animation can be downloaded at this link: https://drive.google.com/file/d/1NeHm4kaM9BPSBUPPSR6SIij_Jv-mE6pD/view?usp=share_link
+
+Upon review of the animation, Experiment 6 used the same settings, but with less Augmentation. Overdoing augmentation can decrease model performance. Thus, the focus was placed on flipping, contrast, brightness, and rgb to gray. This improved loss, and performance was much better than previous.
+
+The animation can be downloaded at this link: https://drive.google.com/file/d/1n6J1wWGLgOYX9vTrirqujWVXddGMdDB5/view?usp=share_link
+
+![png](images/training_experiments/experiment6_loss.png)
+![png](images/training_experiments/experiment6_precision.png)
+![png](images/training_experiments/experiment5_recall.png)
